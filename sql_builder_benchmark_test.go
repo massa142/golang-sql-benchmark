@@ -28,9 +28,9 @@ func BenchmarkDbrBuilderSimple(b *testing.B) {
 func BenchmarkDbrBuilderComplex(b *testing.B) {
 	sess := dbrSess()
 
-	arg_eq1 := dbr.Eq{"f": 2, "x": "hi"}
+	arg_eq1 := dbr.And(dbr.Eq("f", 2), dbr.Eq("x", "hi"))
 	arg_eq2 := map[string]interface{}{"g": 3}
-	arg_eq3 := dbr.Eq{"h": []int{1, 2, 3}}
+	arg_eq3 := dbr.Eq("h", []int{1, 2, 3})
 
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
