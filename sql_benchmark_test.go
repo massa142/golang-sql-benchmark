@@ -7,11 +7,13 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/coopernurse/gorp"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gocraft/dbr"
-
-	"github.com/coopernurse/gorp"
 	"github.com/jmoiron/sqlx"
+	"github.com/massa142/golang-sql-benchmark/models"
+	"github.com/vattle/sqlboiler/boil"
+	"github.com/vattle/sqlboiler/queries/qm"
 )
 
 var mysqlDSN string
@@ -422,6 +424,100 @@ func benchmarkGorpSelectAllWithArgs(b *testing.B, limit int) {
 	}
 }
 
+func benchmarkSQLBoilerSelectAll(b *testing.B, limit int) {
+	db := boilConn()
+	b.ResetTimer()
+
+	for n := 0; n < b.N; n++ {
+		_, err := models.Tickets(db, qm.Limit(limit)).All()
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}
+}
+
+func benchmarkSQLBoilerSelectAllWithArgs(b *testing.B, limit int) {
+	db := boilConn()
+	b.ResetTimer()
+
+	for n := 0; n < b.N; n++ {
+		_, err := models.Tickets(db,
+			qm.Where("subdomain_id = ?", 1),
+			qm.WhereIn("state in ?", "open", "spam"),
+			qm.Limit(limit)).All()
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}
+}
+
+func benchmarkSQLBoilerSelectInts(b *testing.B, limit int) {
+	db := boilConn()
+	b.ResetTimer()
+
+	for n := 0; n < b.N; n++ {
+		_, err := models.Tickets(db, qm.Limit(limit)).Count()
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}
+}
+
+//
+// sqlboiler
+//
+
+// Select into integers
+func BenchmarkSQLBoilerSelectInts1(b *testing.B) {
+	benchmarkSQLBoilerSelectInts(b, 1)
+}
+
+func BenchmarkSQLBoilerSelectInts100(b *testing.B) {
+	benchmarkSQLBoilerSelectInts(b, 100)
+}
+
+func BenchmarkSQLBoilerSelectInts1000(b *testing.B) {
+	benchmarkSQLBoilerSelectInts(b, 1000)
+}
+
+func BenchmarkSQLBoilerSelectInts10000(b *testing.B) {
+	benchmarkSQLBoilerSelectInts(b, 10000)
+}
+
+// Select without query params
+func BenchmarkSQLBoilerSelectAll1(b *testing.B) {
+	benchmarkSQLBoilerSelectAll(b, 1)
+}
+
+func BenchmarkSQLBoilerSelectAll100(b *testing.B) {
+	benchmarkSQLBoilerSelectAll(b, 100)
+}
+
+func BenchmarkSQLBoilerSelectAll1000(b *testing.B) {
+	benchmarkSQLBoilerSelectAll(b, 1000)
+}
+
+func BenchmarkSQLBoilerSelectAll10000(b *testing.B) {
+	benchmarkSQLBoilerSelectAll(b, 10000)
+}
+
+// Select with query params
+func BenchmarkSQLBoilerSelectAllWithArgs1(b *testing.B) {
+	benchmarkSQLBoilerSelectAllWithArgs(b, 1)
+}
+
+func BenchmarkSQLBoilerSelectAllWithArgs100(b *testing.B) {
+	benchmarkSQLBoilerSelectAllWithArgs(b, 100)
+}
+
+func BenchmarkSQLBoilerSelectAllWithArgs1000(b *testing.B) {
+	benchmarkSQLBoilerSelectAllWithArgs(b, 1000)
+}
+
+func BenchmarkSQLBoilerSelectAllWithArgs10000(b *testing.B) {
+	benchmarkSQLBoilerSelectAllWithArgs(b, 10000)
+}
+
 //
 // Connection helpers
 //
@@ -453,4 +549,13 @@ func gorpConn() *gorp.DbMap {
 	}
 	dbmap := &gorp.DbMap{Db: db, Dialect: gorp.MySQLDialect{"InnoDb", "UTF8"}}
 	return dbmap
+}
+
+func boilConn() boil.Executor {
+	db, err := sql.Open("mysql", mysqlDSN)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	boil.SetDB(db)
+	return boil.GetDB()
 }
