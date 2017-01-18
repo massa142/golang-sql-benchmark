@@ -9,6 +9,7 @@ A collection of benchmarks for popular Go database/SQL utilities
 *  [gocraft/dbr](https://github.com/gocraft/dbr)
 *  [Gorp](https://github.com/coopernurse/gorp)
 *  [Sqlx](https://github.com/jmoiron/sqlx)
+*  [SQLBoiler](https://github.com/vattle/sqlboiler)
 *  [Squirrel](https://github.com/lann/squirrel)
 
 # database/sql SQL Execution Benchmarks:
@@ -18,7 +19,7 @@ A collection of benchmarks for popular Go database/SQL utilities
 * **BenchmarkPreparedStatementsSingle** - Runs queries with query arguments, but creates and reuses the a single prepared statement
 
 
-# Dbr/Sqlx/Gorp SQL Execution Benchmarks:
+# Dbr/Sqlx/Gorp/SQLBoiler SQL Execution Benchmarks:
 Each library under test has the same set of benchmarks, just replace `Dbr` in the examples with `Sqlx` or `Gorp`.
 Each one is run with varying number of rows, N.
 
@@ -34,62 +35,73 @@ Test building (but not executing) various SQL statements
 * **BenchmarkBuilderSquirrelSimple** - Simple SQL query with squirrel
 * **BenchmarkBuilderSquirrelComplex** - Complex SQL query with squirrel
 
-# Output
-
-`godep go test -bench=. -benchmem 2>/dev/null | column -t` on @tyler-smith's 2.6 GHz i7 Macbook Pro:
+# Bench
 
 ```
-BenchmarkPreparedStatementsNone       100000       23137     ns/op  612      B/op  20     allocs/op
-BenchmarkPreparedStatementsThrowaway  20000        94086     ns/op  795      B/op  25     allocs/op
-BenchmarkPreparedStatementsSingle     50000        33426     ns/op  652      B/op  23     allocs/op
+BenchmarkPreparedStatementsNone-4            	   10000	    197758 ns/op	     552 B/op	      19 allocs/op
+BenchmarkPreparedStatementsThrowaway-4       	    5000	    299326 ns/op	     737 B/op	      27 allocs/op
+BenchmarkPreparedStatementsSingle-4          	   10000	    167421 ns/op	     512 B/op	      21 allocs/op
 
-BenchmarkDbrSelectInts1               100000       30098     ns/op  1198     B/op  22     allocs/op
-BenchmarkDbrSelectInts100             20000        94477     ns/op  11645    B/op  426    allocs/op
-BenchmarkDbrSelectInts1000            5000         627958    ns/op  100574   B/op  4041   allocs/op
-BenchmarkDbrSelectInts10000           500          6207828   ns/op  1297929  B/op  40177  allocs/op
-BenchmarkDbrSelectAll1                50000        35468     ns/op  1876     B/op  60     allocs/op
-BenchmarkDbrSelectAll100              10000        157510    ns/op  29256    B/op  863    allocs/op
-BenchmarkDbrSelectAll1000             2000         1436856   ns/op  272365   B/op  8078   allocs/op
-BenchmarkDbrSelectAll10000            100          12927094  ns/op  2979829  B/op  80171  allocs/op
-BenchmarkDbrSelectAllWithArgs1        50000        38959     ns/op  2590     B/op  72     allocs/op
-BenchmarkDbrSelectAllWithArgs100      10000        162227    ns/op  29970    B/op  875    allocs/op
-BenchmarkDbrSelectAllWithArgs1000     2000         1227154   ns/op  273765   B/op  8093   allocs/op
-BenchmarkDbrSelectAllWithArgs10000    100          13342026  ns/op  3000164  B/op  80284  allocs/op
+BenchmarkDbrSelectInts1-4                    	   10000	    158974 ns/op	    1480 B/op	      28 allocs/op
+BenchmarkDbrSelectInts100-4                  	   10000	    158488 ns/op	    1592 B/op	      34 allocs/op
+BenchmarkDbrSelectInts1000-4                 	   10000	    171229 ns/op	    1592 B/op	      34 allocs/op
+BenchmarkDbrSelectInts10000-4                	   10000	    179411 ns/op	    1592 B/op	      34 allocs/op
+BenchmarkDbrSelectAll1-4                     	    5000	    211225 ns/op	    2945 B/op	      46 allocs/op
+BenchmarkDbrSelectAll100-4                   	    5000	    227243 ns/op	    4057 B/op	      70 allocs/op
+BenchmarkDbrSelectAll1000-4                  	    5000	    223814 ns/op	    4057 B/op	      70 allocs/op
+BenchmarkDbrSelectAll10000-4                 	    5000	    227796 ns/op	    4057 B/op	      70 allocs/op
+BenchmarkDbrSelectAllWithArgs1-4             	    5000	    259579 ns/op	    3393 B/op	      58 allocs/op
+BenchmarkDbrSelectAllWithArgs100-4           	    5000	    240712 ns/op	    4513 B/op	      82 allocs/op
+BenchmarkDbrSelectAllWithArgs1000-4          	    5000	    237579 ns/op	    4513 B/op	      82 allocs/op
+BenchmarkDbrSelectAllWithArgs10000-4         	    5000	    252805 ns/op	    4513 B/op	      82 allocs/op
 
-BenchmarkSqlxSelectInts1              20000        86128     ns/op  628      B/op  22     allocs/op
-BenchmarkSqlxSelectInts100            10000        203886    ns/op  9480     B/op  426    allocs/op
-BenchmarkSqlxSelectInts1000           2000         1289621   ns/op  83799    B/op  4038   allocs/op
-BenchmarkSqlxSelectInts10000          100          15156243  ns/op  1134724  B/op  40139  allocs/op
-BenchmarkSqlxSelectAll1               50000        32373     ns/op  959      B/op  25     allocs/op
-BenchmarkSqlxSelectAll100             10000        177965    ns/op  28366    B/op  828    allocs/op
-BenchmarkSqlxSelectAll1000            1000         1634705   ns/op  271352   B/op  8042   allocs/op
-BenchmarkSqlxSelectAll10000           100          17483420  ns/op  2989883  B/op  80191  allocs/op
-BenchmarkSqlxSelectAllWithArgs1       10000        140460    ns/op  1228     B/op  30     allocs/op
-BenchmarkSqlxSelectAllWithArgs100     10000        250621    ns/op  23682    B/op  634    allocs/op
-BenchmarkSqlxSelectAllWithArgs1000    2000         1548073   ns/op  229879   B/op  6049   allocs/op
-BenchmarkSqlxSelectAllWithArgs10000   100          15441239  ns/op  2587009  B/op  60190  allocs/op
+BenchmarkSqlxSelectInts1-4                   	    5000	    391918 ns/op	     576 B/op	      24 allocs/op
+BenchmarkSqlxSelectInts100-4                 	    3000	    391969 ns/op	     664 B/op	      30 allocs/op
+BenchmarkSqlxSelectInts1000-4                	    3000	    467722 ns/op	     664 B/op	      30 allocs/op
+BenchmarkSqlxSelectInts10000-4               	    3000	    440100 ns/op	     664 B/op	      30 allocs/op
+BenchmarkSqlxSelectAll1-4                    	    5000	    278827 ns/op	     888 B/op	      24 allocs/op
+BenchmarkSqlxSelectAll100-4                  	    5000	    316276 ns/op	    1096 B/op	      33 allocs/op
+BenchmarkSqlxSelectAll1000-4                 	    5000	    293700 ns/op	    1096 B/op	      33 allocs/op
+BenchmarkSqlxSelectAll10000-4                	    5000	    283353 ns/op	    1096 B/op	      33 allocs/op
+BenchmarkSqlxSelectAllWithArgs1-4            	    3000	    503494 ns/op	    1192 B/op	      35 allocs/op
+BenchmarkSqlxSelectAllWithArgs100-4          	    2000	    519654 ns/op	    1368 B/op	      43 allocs/op
+BenchmarkSqlxSelectAllWithArgs1000-4         	    3000	    576125 ns/op	    1368 B/op	      43 allocs/op
+BenchmarkSqlxSelectAllWithArgs10000-4        	    2000	    566950 ns/op	    1368 B/op	      43 allocs/op
 
-BenchmarkGorpSelectInts1              10000        134277    ns/op  432      B/op  15     allocs/op
-BenchmarkGorpSelectAll1               50000        44086     ns/op  1983     B/op  75     allocs/op
-BenchmarkGorpSelectAll100             10000        232527    ns/op  34258    B/op  978    allocs/op
-BenchmarkGorpSelectAll1000            1000         1563675   ns/op  321846   B/op  9100   allocs/op
-BenchmarkGorpSelectAll10000           100          16451807  ns/op  3472508  B/op  90250  allocs/op
-BenchmarkGorpSelectAllWithArgs1       10000        131738    ns/op  2306     B/op  80     allocs/op
-BenchmarkGorpSelectAllWithArgs100     10000        265323    ns/op  29948    B/op  785    allocs/op
-BenchmarkGorpSelectAllWithArgs1000    2000         1423747   ns/op  279838   B/op  7103   allocs/op
-BenchmarkGorpSelectAllWithArgs10000   100          14538568  ns/op  3072519  B/op  70263  allocs/op
+BenchmarkGorpSelectInts1-4                   	    2000	    536336 ns/op	     387 B/op	      17 allocs/op
+BenchmarkGorpSelectAll1-4                    	    5000	    399204 ns/op	    1786 B/op	      68 allocs/op
+BenchmarkGorpSelectAll100-4                  	    3000	    388126 ns/op	    2043 B/op	      78 allocs/op
+BenchmarkGorpSelectAll1000-4                 	    3000	    395568 ns/op	    2043 B/op	      78 allocs/op
+BenchmarkGorpSelectAll10000-4                	    5000	    381177 ns/op	    2042 B/op	      78 allocs/op
+BenchmarkGorpSelectAllWithArgs1-4            	    2000	    670428 ns/op	    2092 B/op	      79 allocs/op
+BenchmarkGorpSelectAllWithArgs100-4          	    2000	    725952 ns/op	    2316 B/op	      88 allocs/op
+BenchmarkGorpSelectAllWithArgs1000-4         	    2000	    724523 ns/op	    2316 B/op	      88 allocs/op
+BenchmarkGorpSelectAllWithArgs10000-4        	    2000	    728395 ns/op	    2316 B/op	      88 allocs/op
 
-BenchmarkBuilderDbrSimple             1000000      1699      ns/op  866      B/op  13     allocs/op
-BenchmarkBuilderDbrComplex            500000       6193      ns/op  2190     B/op  37     allocs/op
+BenchmarkSQLBoilerSelectInts1-4              	    5000	    238310 ns/op	     850 B/op	      21 allocs/op
+BenchmarkSQLBoilerSelectInts100-4            	    5000	    252447 ns/op	     850 B/op	      21 allocs/op
+BenchmarkSQLBoilerSelectInts1000-4           	    5000	    240472 ns/op	     850 B/op	      21 allocs/op
+BenchmarkSQLBoilerSelectInts10000-4          	    5000	    267841 ns/op	     850 B/op	      21 allocs/op
+BenchmarkSQLBoilerSelectAll1-4               	    5000	    303593 ns/op	    1450 B/op	      35 allocs/op
+BenchmarkSQLBoilerSelectAll100-4             	    5000	    300622 ns/op	    1786 B/op	      47 allocs/op
+BenchmarkSQLBoilerSelectAll1000-4            	    5000	    289008 ns/op	    1786 B/op	      47 allocs/op
+BenchmarkSQLBoilerSelectAll10000-4           	    5000	    303211 ns/op	    1786 B/op	      47 allocs/op
+BenchmarkSQLBoilerSelectAllWithArgs1-4       	    2000	    694815 ns/op	    2302 B/op	      65 allocs/op
+BenchmarkSQLBoilerSelectAllWithArgs100-4     	    2000	    679760 ns/op	    2574 B/op	      77 allocs/op
+BenchmarkSQLBoilerSelectAllWithArgs1000-4    	    2000	    663936 ns/op	    2590 B/op	      77 allocs/op
+BenchmarkSQLBoilerSelectAllWithArgs10000-4   	    2000	    682127 ns/op	    2590 B/op	      77 allocs/op
 
-BenchmarkBuilderSquirrelSimple        200000       8981      ns/op  2780     B/op  51     allocs/op
-BenchmarkBuilderSquirrelComplex       50000        44721     ns/op  11707    B/op  259    allocs/op
+BenchmarkDbrBuilderSimple-4                  	 1000000	      1532 ns/op	     984 B/op	      17 allocs/op
+BenchmarkDbrBuilderComplex-4                 	  200000	      6972 ns/op	    2824 B/op	      64 allocs/op
+
+BenchmarkSquirrelBuilderSimple-4             	  200000	      6694 ns/op	    2552 B/op	      51 allocs/op
+BenchmarkSquirrelBuilderComplex-4            	   50000	     34412 ns/op	   11539 B/op	     276 allocs/op
 ```
+## date
 
-# Run yourself
+Jan 18, 2017
 
-* Use the `godep` tool or manually install all libraries under test
-* Create db: `mysql -e "create database golang_sql_benchmarks;"`
-* Create schema: `mysql golang_sql_benchmarks < structure.sql`
-* Run: `godep go test -bench=. -benchmem`
-* You can set the MySQL DSN to use by setting the GOLANG_SQL_BENCHMARKS_DSN env var (defaults to root@unix(/var/run/mysqld/mysqld.sock)/golang_sql_benchmarks)
+## env
+
+go version: go1.7.4 darwin/amd64  
+MacBook Pro, 2.7 GHz Intel Core i5, 8 GB 1867 MHz DDR3
